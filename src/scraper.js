@@ -1,7 +1,7 @@
 const fetch = require('node-fetch');
 const cheerio = require('cheerio');
 
-const STAT_INDEX = ['name', 'position', 'age', 'team', 'games_played', 'games_started', 'minutes_played', 'fg_made', 'fg_attempted', 'fg_percent', 'threes_made', 'threes_attempted', 'threes_percent', 'twos_made', 'twos_attempted', 'twos_percent', 'eff_fg_percent', 'ft_made', 'ft_attempted', 'ft_percent', 'off_rebounds', 'def_rebounds', 'tot_rebounds', 'assists', 'steals', 'blocks', 'turnovers', 'personal_fouls', 'points'];
+const STAT_INDEX = ['id', 'name', 'position', 'age', 'team', 'games_played', 'games_started', 'minutes_played', 'fg_made', 'fg_attempted', 'fg_percent', 'threes_made', 'threes_attempted', 'threes_percent', 'twos_made', 'twos_attempted', 'twos_percent', 'eff_fg_percent', 'ft_made', 'ft_attempted', 'ft_percent', 'off_rebounds', 'def_rebounds', 'tot_rebounds', 'assists', 'steals', 'blocks', 'turnovers', 'personal_fouls', 'points'];
 
 exports.getAllPlayers = async (season, duplicates = false) => {
     // Get HTML from BBREF and turn into text data
@@ -15,11 +15,20 @@ exports.getAllPlayers = async (season, duplicates = false) => {
 
     // Form list with table data
     $('td').each((i, stat) => {
+        const link = $(stat).find('a').attr('href');
+        if (link) {
+            let result = link.match(/\/players\/[a-z]\/.+\./);
+            if (result) {
+                result = result[0].substring(11);
+                result = result.substring(0, result.length - 1);
+                statList.push(result);
+            }
+        }
         statList.push($(stat).text());
     });
 
     // Create 2D array
-    const BBREF_COLS = 29;
+    const BBREF_COLS = 30;
     const BBREF_ROWS = statList.length / BBREF_COLS;
 
     // Make json object
