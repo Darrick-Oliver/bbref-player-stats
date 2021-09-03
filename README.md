@@ -6,9 +6,9 @@ Take a look at the documentation below for more information
 
 # Documentation
 
-## getAllPlayers(season, duplicates)
+## getAllPlayers(season, stat, duplicates)
 
-Usage:
+**Usage:**
 
 ```
 const bbstats = require('bbref-player-stats');
@@ -16,8 +16,45 @@ const bbstats = require('bbref-player-stats');
 // Request per game player data without duplicates
 const result1 = await bbstats.getAllPlayers(2021);
 
+// Request specific stat from player data without duplicates
+const result2 = await bbstats.getAllPlayers(2021, 'totals');
+
 // Request per game player data with duplicates (separate data for each team the player was on)
-const result2 = await bbstats.getAllPlayers(2021, true);
+const result3 = await bbstats.getAllPlayers(2021, 'per_game', true);
 ```
 
-Returns a JSON object with the scraped player data from https://www.basketball-reference.com/leagues/NBA_${season}_per_game.html
+**Supported stats:**
+
+'per_game', 'totals', 'advanced'
+
+**Return value:**
+
+Returns an array of all NBA players as JSON objects from the specified season
+
+## getPlayerStats(id, stat, type)
+
+**Usage:**
+
+```
+const bbstats = require('bbref-player-stats');
+
+const players = await bbstats.getAllPlayers(2021);
+
+// Request regular season per game stats using player id
+const result1 = await bbstats.getPlayerStats(players[0].id);
+const result2 = await bbstats.getPlayerStats('curryst01');
+
+// Request specific stat during regular season using player id
+const result3 = await bbstats.getPlayerStats('curryst01', 'totals');
+
+// Request specific stat during regular season or playoffs using player id
+const result4 = await bbstats.getPlayerStats('curryst01', 'per_game', 'playoffs');
+```
+
+**Supported stats:**
+
+'per_game', 'totals', 'advanced'
+
+**Return value:**
+
+Returns an array of JSON objects, each of which is a season's worth of the given statistical data on the player

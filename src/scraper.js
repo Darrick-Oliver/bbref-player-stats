@@ -2,15 +2,20 @@ const fetch = require('node-fetch');
 const cheerio = require('cheerio');
 
 const STAT_INDEX = ['id', 'name', 'position', 'age', 'team', 'games_played', 'games_started', 'minutes_played', 'fg_made', 'fg_attempted', 'fg_percent', 'threes_made', 'threes_attempted', 'threes_percent', 'twos_made', 'twos_attempted', 'twos_percent', 'eff_fg_percent', 'ft_made', 'ft_attempted', 'ft_percent', 'off_rebounds', 'def_rebounds', 'tot_rebounds', 'assists', 'steals', 'blocks', 'turnovers', 'personal_fouls', 'points'];
+const PLAYER_STAT_INDEX = ['season', 'age', 'team', 'league', 'position', 'games_played', 'games_started', 'minutes_played', 'fg_made', 'fg_attempted', 'fg_percent', 'threes_made', 'threes_attempted', 'threes_percent', 'twos_made', 'twos_attempted', 'twos_percent', 'eff_fg_percent', 'ft_made', 'ft_attempted', 'ft_percent', 'off_rebounds', 'def_rebounds', 'tot_rebounds', 'assists', 'steals', 'blocks', 'turnovers', 'personal_fouls', 'points'];
+const ADVANCED_INDEX = ['season', 'age', 'team', 'league', 'position', 'games_played', 'minutes_played', 'per', 'ts_percent', 'threes_attempt_rate', 'ft_attempt_rate', 'orb_percent', 'drb_percent', 'trb_percent', 'ast_percent', 'stl_percent', 'blk_percent', 'tov_percent', 'usg_percent', 'off_ws', 'off_ws', 'def_ws', 'ws', 'ws_per48', 'obpm', 'obpm', 'dbpm', 'bpm', 'vorp'];
 
-exports.getAllPlayers = async (season, duplicates = false) => {
+exports.getAllPlayers = async (season, stat = 'per_game', duplicates = false) => {
+    // Temporary, will add more stat indexes later
+    if (stat !== 'per_game' || stat !== 'totals')
+        return [];
+
     // Get HTML from BBREF and turn into text data
-    const body = await fetch(`https://www.basketball-reference.com/leagues/NBA_${season}_per_game.html`)
-                        .then(async (result) => {
-                            return await result.text();
-                        });
-
-    const $ = cheerio.load(body);
+    const $ = await fetch(`https://www.basketball-reference.com/leagues/NBA_${season}_${stat}.html`)
+        .then(async (result) => {
+            const body = await result.text();
+            return cheerio.load(body);
+        });
     const statList = [];
 
     // Form list with table data
@@ -56,4 +61,42 @@ exports.getAllPlayers = async (season, duplicates = false) => {
     }
 
     return playerList;
+}
+
+exports.getPlayerStats = async (id, stat = 'per_game', type = 'regular') => {
+    if (id.length === 0)
+        return null;
+    
+    // Check type
+    const part = (type === 'regular') ? '' : (type === 'playoffs') ? type.concat('_') : -1;
+    if (part === -1) return [];
+    
+    // Get HTML from BBREF and turn into text data
+    const $ = await fetch(`https://www.basketball-reference.com/players/${id.charAt(0)}/${id}.html`)
+        .then(async (result) => {
+            const body = await result.text();
+            return cheerio.load(body);
+        });
+    const statList = [];
+
+    // Get indeces
+    let indeces = PLAYER_STAT_INDEX;
+    if (stat === 'totals') {
+        indeces.push('triple_doubles', 'triple_doubles');
+    }
+    else if (stat === 'advanced') {
+        indeces = ADVANCED_INDEX;
+    }
+
+    // Form list with table data
+    $(`table[id=${part}${stat}]`).find('tbody > tr').each((i, rows) => {
+        console.log(i);
+        let season = {};
+        $(rows).find('td, th').each((i, data) => {
+            season[indeces[i]] = $(data).text();
+        })
+        statList.push(season);
+    });
+
+    return statList;
 }
