@@ -1,0 +1,22 @@
+{
+  "name": "bbref-player-stats",
+  "version": "1.0.5",
+  "description": "Scraper tool to get player data from basketball reference",
+  "main": "./src/scraper.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "basketball",
+    "reference",
+    "player",
+    "stats",
+    "nba"
+  ],
+  "author": "Darrick Oliver",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.10",
+    "node-fetch": "^2.6.1"
+  }
+}
