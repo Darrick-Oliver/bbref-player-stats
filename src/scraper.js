@@ -7,7 +7,7 @@ const ADVANCED_INDEX = ['season', 'age', 'team', 'league', 'position', 'games_pl
 
 exports.getAllPlayers = async (season, stat = 'per_game', duplicates = false) => {
     // Temporary, will add more stat indexes later
-    if (stat !== 'per_game' || stat !== 'totals')
+    if (stat !== 'per_game' && stat !== 'totals')
         return [];
 
     // Get HTML from BBREF and turn into text data
