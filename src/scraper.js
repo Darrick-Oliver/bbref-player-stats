@@ -90,7 +90,6 @@ exports.getPlayerStats = async (id, stat = 'per_game', type = 'regular') => {
 
     // Form list with table data
     $(`table[id=${part}${stat}]`).find('tbody > tr').each((i, rows) => {
-        console.log(i);
         let season = {};
         $(rows).find('td, th').each((i, data) => {
             season[indeces[i]] = $(data).text();
